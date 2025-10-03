@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Build & Start Services') {
+            steps {
+                sh 'docker-compose up -d flask_app selenium-hub chrome'
+            }
+        }
+
+        stage('Run Selenium Tests') {
+            steps {
+                sh 'docker-compose up --build test-runner'
+            }
+        }
+
+        stage('Publish Reports') {
+            steps {
+                junit 'tests/results.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker-compose down'
+        }
+    }
+}
